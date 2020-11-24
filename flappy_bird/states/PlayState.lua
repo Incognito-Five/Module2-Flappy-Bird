@@ -17,6 +17,8 @@ PIPE_HEIGHT = 288
 BIRD_WIDTH = 38
 BIRD_HEIGHT = 24
 
+local spawnDt = math.random() * 1.5 + 1.2
+
 function PlayState:init()
     self.bird = Bird()
     self.pipePairs = {}
@@ -28,31 +30,34 @@ function PlayState:init()
 end
 
 function PlayState:update(dt)
-    -- update timer for pipe spawning
-    self.timer = self.timer + dt
 
-    -- spawn a new pipe pair every second and a half
-    if self.timer > 2 then
-        -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
-        -- no higher than 10 pixels below the top edge of the screen,
-        -- and no lower than a gap length (90 pixels) from the bottom
-        local y = math.max(-PIPE_HEIGHT + 10, 
+    if scrolling then
+        -- update timer for pipe spawning
+        self.timer = self.timer + dt
+
+        -- spawn a new pipe pair every second and a half
+        if self.timer > spawnDt then
+            -- modify the last Y coordinate we placed so pipe gaps aren't too far apart
+            -- no higher than 10 pixels below the top edge of the screen,
+            -- and no lower than a gap length (90 pixels) from the bottom
+            local y = math.max(-PIPE_HEIGHT + 10, 
             math.min(self.lastY + math.random(-20, 20), VIRTUAL_HEIGHT - 90 - PIPE_HEIGHT))
-        self.lastY = y
+            self.lastY = y
 
-        -- add a new pipe pair at the end of the screen at our new Y
-        table.insert(self.pipePairs, PipePair(y))
+            -- add a new pipe pair at the end of the screen at our new Y
+            table.insert(self.pipePairs, PipePair(y))
 
-        -- reset timer
-        self.timer = 0
-    end
+            -- reset timer
+            self.timer = 0
+            spawnDt = math.random() * 1.5 + 1.2
+        end
 
-    -- for every pair of pipes..
-    for k, pair in pairs(self.pipePairs) do
-        -- score a point if the pipe has gone past the bird to the left all the way
-        -- be sure to ignore it if it's already been scored
-        if not pair.scored then
-            if pair.x + PIPE_WIDTH < self.bird.x then
+        -- for every pair of pipes..
+        for k, pair in pairs(self.pipePairs) do
+            -- score a point if the pipe has gone past the bird to the left all the way
+            -- be sure to ignore it if it's already been scored
+            if not pair.scored then
+                if pair.x + PIPE_WIDTH < self.bird.x then
                 self.score = self.score + 1
                 pair.scored = true
                 sounds['score']:play()
@@ -90,14 +95,26 @@ function PlayState:update(dt)
     -- update bird based on gravity and input
     self.bird:update(dt)
 
-    -- reset if we get to the ground
-    if self.bird.y > VIRTUAL_HEIGHT - 15 then
-        sounds['explosion']:play()
-        sounds['hurt']:play()
+        -- reset if we get to the ground
+        if self.bird.y > VIRTUAL_HEIGHT - 15 then
+            sounds['explosion']:play()
+            sounds['hurt']:play()
 
-        gStateMachine:change('score', {
-            score = self.score
-        })
+            gStateMachine:change('score', {
+                score = self.score
+            })
+        end
+    end
+
+    -- pause logic
+    if love.keyboard.wasPressed('p') then
+        if scrolling then
+            scrolling = false
+            sounds['music']:pause()
+        else
+            scrolling = true
+            sounds['music']:play()
+        end
     end
 end
 
@@ -110,6 +127,16 @@ function PlayState:render()
     love.graphics.print('Score: ' .. tostring(self.score), 8, 8)
 
     self.bird:render()
+
+
+    -- render pause screen if scrolling is false
+    if scrolling == false then
+        -- render 'pause' big in the middle of the screen
+        love.graphics.setFont(hugeFont)
+        love.graphics.printf('Pause', 0, 100, VIRTUAL_WIDTH, 'center')
+        love.graphics.setFont(mediumFont)
+        love.graphics.printf('Press P to resume', 0, 160, VIRTUAL_WIDTH, 'center')
+    end
 end
 
 --[[
