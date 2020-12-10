@@ -126,6 +126,8 @@ function PlayState:render()
     love.graphics.setFont(flappyFont)
     love.graphics.setColor(0,0,255)
     love.graphics.print('Score: ' .. tostring(self.score), 8, 8)
+    love.graphics.setFont(mediumFont)
+    love.graphics.print('Press P to pause', 380, 8)
     love.graphics.setColor(1,255,255,255)
     self.bird:render()
 
