@@ -22,8 +22,10 @@ end
 
 function TitleScreenState:render()
     love.graphics.setFont(flappyFont)
+    love.graphics.setColor(0,0,255)
     love.graphics.printf('Fifty Bird', 0, 64, VIRTUAL_WIDTH, 'center')
 
     love.graphics.setFont(mediumFont)
-    love.graphics.printf('Press Enter', 0, 100, VIRTUAL_WIDTH, 'center')
+    love.graphics.setColor(1,255,255,255)
+    love.graphics.printf('Press Enter', 0, 220, VIRTUAL_WIDTH, 'center')
 end
