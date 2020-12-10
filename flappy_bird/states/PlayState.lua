@@ -124,8 +124,9 @@ function PlayState:render()
     end
 
     love.graphics.setFont(flappyFont)
+    love.graphics.setColor(0,0,255)
     love.graphics.print('Score: ' .. tostring(self.score), 8, 8)
-
+    love.graphics.setColor(1,255,255,255)
     self.bird:render()
 
 
@@ -133,8 +134,10 @@ function PlayState:render()
     if scrolling == false then
         -- render 'pause' big in the middle of the screen
         love.graphics.setFont(hugeFont)
+        love.graphics.setColor(0,0,255)
         love.graphics.printf('Pause', 0, 100, VIRTUAL_WIDTH, 'center')
         love.graphics.setFont(mediumFont)
+        love.graphics.setColor(1,255,255,255)
         love.graphics.printf('Press P to resume', 0, 160, VIRTUAL_WIDTH, 'center')
     end
 end
